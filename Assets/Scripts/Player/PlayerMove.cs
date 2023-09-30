@@ -105,13 +105,9 @@ public class PlayerMove : MonoBehaviour
     }
     private void Jump()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && isGround)
         {
             rigid.velocity = Vector2.up * jumpPower;
-        }
-        else
-        {
-            rigid.velocity = Vector2.down * 3f;
         }
     }
     private void Dash()
@@ -128,6 +124,7 @@ public class PlayerMove : MonoBehaviour
             // rigid.velocity = Vector2.down * climbSpeed;
             if (Input.GetKeyDown(KeyCode.Space) && !isWallJump)
             {
+                Debug.Log("dd");
                 StartCoroutine(WallJumpWait());
                 rigid.velocity = new Vector2(-isRight * climbJumpPower, 0.5f * climbJumpPower);
             }
@@ -173,4 +170,16 @@ public class PlayerMove : MonoBehaviour
         bulletCurrTime -= Time.deltaTime;
     }
 
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Trap"))
+        {
+            
+        }
+    }
+
+    private void Damage()
+    {
+        gameObject.GetComponent<PlayerHp>().hp -= 10;
+    }
 }
