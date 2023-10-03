@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Wall
   - PetRadius
+  - Trap
   layers:
   - Default
   - TransparentFX

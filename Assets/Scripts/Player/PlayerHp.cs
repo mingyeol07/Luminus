@@ -8,9 +8,11 @@ public class PlayerHp : MonoBehaviour
     public Image hpImage;
     public Image PetSkillImage;
     public Image fearImage;
-    private bool isFear = true;
+    public bool isFear = true;
 
     public float hp = 100;
+    public float petSkill = 100;
+    public float fear = 100;
 
     public LayerMask lightLayer;
     public Transform lightRadius;

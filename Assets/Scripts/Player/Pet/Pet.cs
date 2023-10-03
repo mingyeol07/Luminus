@@ -27,7 +27,7 @@ public class Pet : MonoBehaviour
         player = GameObject.FindWithTag("Player").transform;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (Input.GetKey(KeyCode.Mouse1))
         {
@@ -45,19 +45,33 @@ public class Pet : MonoBehaviour
         {
             targetPosition = Vector3.Lerp(transform.position, searchPoint, Time.deltaTime * searchSpeed);
             virtualCamera.Follow = gameObject.transform;
-        }
-        else targetPosition = Vector3.Lerp(transform.position, petPos.position, Time.deltaTime * followSpeed);
 
-        transform.position = targetPosition;
+            if (searchPoint.x > transform.position.x)
+            {
+                spriteRenderer.flipX = true;
+            }
+            if (searchPoint.x < transform.position.x)
+            {
+                spriteRenderer.flipX = false;
+            }
+        }
+        else
+        {
+            targetPosition = Vector3.Lerp(transform.position, petPos.position, Time.deltaTime * followSpeed);
 
-        if (player.position.x > transform.position.x)
-        {
-            spriteRenderer.flipX = true;
+            if (player.position.x > transform.position.x)
+            {
+                spriteRenderer.flipX = true;
+            }
+            if (player.position.x < transform.position.x)
+            {
+                spriteRenderer.flipX = false;
+            }
         }
-        if (player.position.x < transform.position.x)
-        {
-            spriteRenderer.flipX = false;
-        }
+
+            transform.position = targetPosition;
+
+        
     }
 
     private void OnTriggerExit2D(Collider2D collision)
