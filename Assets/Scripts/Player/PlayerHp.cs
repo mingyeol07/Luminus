@@ -10,7 +10,18 @@ public class PlayerHp : MonoBehaviour
     public Image fearImage;
     public bool isFear = true;
 
-    public float hp = 100;
+    private float hp = 100;
+    public float Hp
+    {
+        get { return hp; }
+        set
+        {
+            hp = value;
+            if (hp <= 0)
+            {
+            }// DIe;;
+        }
+    }
     public float petSkill = 100;
     public float fear = 100;
 
@@ -20,7 +31,7 @@ public class PlayerHp : MonoBehaviour
     private void Start()
     {
         fearImage.fillAmount = 0;
-        hpImage.fillAmount = hp / 100;
+        hpImage.fillAmount =  hp / 100;
         PetSkillImage.fillAmount = 0;
     }
 

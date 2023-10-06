@@ -180,6 +180,6 @@ public class PlayerMove : MonoBehaviour
 
     private void Damage()
     {
-        gameObject.GetComponent<PlayerHp>().hp -= 10;
+        gameObject.GetComponent<PlayerHp>().Hp -= 10;
     }
 }
