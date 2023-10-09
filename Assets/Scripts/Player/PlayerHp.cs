@@ -2,12 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Cinemachine;
 
 public class PlayerHp : MonoBehaviour
 {
     public Image hpImage;
     public Image PetSkillImage;
     public Image fearImage;
+
+    public GameObject dieLog;
+    public GameObject hpDownIamge;
+    public GameObject fearingImage;
+
+    public Transform spawnPoint;
+
     public bool isFear = true;
 
     private float hp = 100;
@@ -19,7 +27,8 @@ public class PlayerHp : MonoBehaviour
             hp = value;
             if (hp <= 0)
             {
-            }// DIe;;
+                Die();
+            }
         }
     }
     public float petSkill = 100;
@@ -39,10 +48,12 @@ public class PlayerHp : MonoBehaviour
     {
         if (!isFear)
         {
+            fearingImage.SetActive(true);
             fearImage.fillAmount += Time.deltaTime * 1f;
         }
         else
         {
+            fearingImage.SetActive(false);
             fearImage.fillAmount -= Time.deltaTime * 0.3f;
         }
 
@@ -52,5 +63,31 @@ public class PlayerHp : MonoBehaviour
         {
             hpImage.fillAmount -= Time.deltaTime * 0.3f;
         }
+    }
+
+    public void Damage()
+    {
+        gameObject.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
+        gameObject.layer = 14;
+        hpDownIamge.SetActive(true);
+        hp -= 10;
+        Invoke("OffDamaged", 1f);
+    }
+
+    void OffDamaged()
+    {
+        hpDownIamge.SetActive(false);
+        gameObject.layer = 0;
+    }
+
+    void Die()
+    {
+        gameObject.GetComponent<PlayerMove>().isCodeActive = false;
+        dieLog.SetActive(true);
+    }
+
+    public void ReSpawn()
+    {
+        dieLog.SetActive(false);
     }
 }

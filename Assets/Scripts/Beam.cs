@@ -34,4 +34,11 @@ public class Beam : MonoBehaviour
             gameObject.SetActive(false);
         }
     }
+
+    void OnDisable()
+    {
+        objectRenderer = GetComponent<Renderer>();
+        currentAlpha = 1f;
+        fadeSpeed = 1f / fadeDuration;
+    }
 }

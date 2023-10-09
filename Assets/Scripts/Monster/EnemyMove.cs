@@ -8,6 +8,7 @@ public class EnemyMove : MonoBehaviour
     SpriteRenderer spriteRenderer;
     public float moveSpeed = 3.0f;
     public int nextMove;
+    public bool isWater;
 
     void Awake()
     {
@@ -22,15 +23,19 @@ public class EnemyMove : MonoBehaviour
 
     void FixedUpdate()
     {
-        rigid.velocity = new Vector2(nextMove * moveSpeed, rigid.velocity.y);
+        if (isWater)
+        {
+            rigid.velocity = new Vector2(nextMove * moveSpeed, nextMove * moveSpeed);
+        }
+        else rigid.velocity = new Vector2(nextMove * moveSpeed, rigid.velocity.y);
 
         if (nextMove == -1)
         {
-            spriteRenderer.flipX = true;
+            transform.localScale = new Vector3(-2, 2,2);
         }
         else if (nextMove == 1)
         {
-            spriteRenderer.flipX = false;
+            transform.localScale = new Vector3(2, 2, 2);
         }
     }
 

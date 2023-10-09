@@ -2,16 +2,26 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Spine.Unity;
+using System.Data.Common;
 
 public class PlayerMove : MonoBehaviour
 {
+    [Header("Animation")]
+    public GameObject idle;
+    public GameObject jump;
+    public GameObject run;
+    public GameObject trampleAnim;
+    public GameObject climbAnim;
+    bool isIdle = true;
+
     [Header("Move")]
     [SerializeField] private float jumpPower;
     [SerializeField] private float climbJumpPower;
     [SerializeField] private float moveSpeed;
     [SerializeField] private float tramplePower;
     [SerializeField] private float climbSpeed;
-    // [SerializeField] private float dashPower;
+    [SerializeField] private GameObject dashEffect;
 
     [Header("Attack")]
     [SerializeField] private GameObject arm;
@@ -23,8 +33,11 @@ public class PlayerMove : MonoBehaviour
     [Header("LayerCheck")]
     [SerializeField] private Transform circlePos;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask trampleLayer;
+    [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private LayerMask wallLayer;
-    private float groundCheckRadius = 0.1f; // 바닥을 감지할 circle의 반경
+
+    private float groundCheckRadius = 0.01f; // 바닥을 감지할 circle의 반경
     private float wallCheckDistance = 0.4f;
 
     [Header("Bool")]
@@ -34,6 +47,10 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private bool isTrampling;
     private float isRight;
     private bool isTrampleWait;
+    private bool isDash;
+    private bool dashCool;
+
+    private bool isTramplingGround;
 
     [Header("Delay")]
     private float trampleDelay = 0.1f;
@@ -51,6 +68,7 @@ public class PlayerMove : MonoBehaviour
     [Header("Ability")]
     public bool dashTrue;
     public bool climbTrue;
+    public bool bubbleTrue;
 
     private void Start()
     {
@@ -62,13 +80,14 @@ public class PlayerMove : MonoBehaviour
     {
         if (isCodeActive)
         {
+            Anim();
             Arm();
             LayerCheck();
             Trample();
-            if (!isTrampling && !isTrampleWait)
+            if (dashTrue) Dash();
+            if (!isTrampling && !isTrampleWait && !isDash)
             {
                 Jump();
-                if (dashTrue) Dash();
                 if (climbTrue) Climb();
                 if (!isWallJump)
                 {
@@ -78,17 +97,60 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
+    private void Anim()
+    {
+        if (isGround)
+        {
+            trampleAnim.SetActive(false);
+            jump.SetActive(false);
+            if (isIdle)
+            {
+                idle.SetActive(true);
+                run.SetActive(false);
+            }
+            else
+            {
+                idle.SetActive(false);
+                run.SetActive(true);
+            }
+        }
+        else
+        {
+            jump.SetActive(true);
+            idle.SetActive(false);
+            run.SetActive(false);
+        }
+
+        if (isTrampling)
+        {
+            trampleAnim.SetActive(true);
+            jump.SetActive(false);
+            idle.SetActive(false);
+            run.SetActive(false);
+            climbAnim.SetActive(false);
+        }
+        if (isWall && !isGround)
+        {
+            climbAnim.SetActive(true);
+            trampleAnim.SetActive(false);
+            jump.SetActive(false);
+            idle.SetActive(false);
+            run.SetActive(false);
+        }
+        else climbAnim.SetActive(false);
+    }
+
     private void LayerCheck()
     {
         if (rigid.velocity.x > 0)
         {
-            transform.localScale = new Vector2(-0.5f, 0.5f);
+            transform.localScale = new Vector2(-0.15f, 0.15f);
             isRight = 1.0f;
             arm.transform.rotation = new Quaternion(0, 0, 0f, 0f);
         }
         else if (rigid.velocity.x < 0)
         {
-            transform.localScale = new Vector2(0.5f, 0.5f);
+            transform.localScale = new Vector2(0.15f, 0.15f);
             isRight = -1.0f;
             arm.transform.rotation = new Quaternion(0, 0, 180f, 0f);
         }
@@ -97,11 +159,21 @@ public class PlayerMove : MonoBehaviour
 
         // Circle을 생성해서 Circle이 지정된 레이어마스크와 닿으면 true
         isGround = Physics2D.OverlapCircle(circlePos.position, groundCheckRadius, groundLayer);
+
+        isTramplingGround = Physics2D.OverlapCircle(circlePos.position, groundCheckRadius, trampleLayer);
     }
     private void Move()
     {
         float h = Input.GetAxisRaw("Horizontal");
         rigid.velocity = new Vector2(h * moveSpeed, rigid.velocity.y);
+        if (Input.GetButton("Horizontal"))
+        {
+            isIdle = false;
+        }
+        else
+        {
+            isIdle = true;
+        }
     }
     private void Jump()
     {
@@ -110,12 +182,33 @@ public class PlayerMove : MonoBehaviour
             rigid.velocity = Vector2.up * jumpPower;
         }
     }
+
     private void Dash()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (isGround)
         {
-            Debug.Log("대쉬");
+            dashCool = true;
         }
+        dashEffect.SetActive(isDash);
+        if (isDash)
+        {
+            rigid.velocity = Vector2.right * isRight * 7f;
+        }
+        if (Input.GetKeyDown(KeyCode.LeftShift) && isDash == false && dashCool)
+        {
+            if (!isGround)
+            {
+                dashCool = false;
+            }
+            StartCoroutine(DashTime());
+        }
+    }
+
+    IEnumerator DashTime()
+    {
+        isDash = true;
+        yield return new WaitForSeconds(0.3f);
+        isDash = false;
     }
     private void Climb()
     {
@@ -134,6 +227,7 @@ public class PlayerMove : MonoBehaviour
     {
         if (isTrampling)
         {
+            
             rigid.velocity = Vector2.down * tramplePower;
             if (isGround)
             {
@@ -150,6 +244,7 @@ public class PlayerMove : MonoBehaviour
         isTrampleWait = false;
         isTrampling = true;
     }
+
     private IEnumerator WallJumpWait()
     {
         isWallJump = true;
@@ -169,17 +264,5 @@ public class PlayerMove : MonoBehaviour
         }
         bulletCurrTime -= Time.deltaTime;
     }
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Trap"))
-        {
-            
-        }
-    }
-
-    private void Damage()
-    {
-        gameObject.GetComponent<PlayerHp>().Hp -= 10;
-    }
+    
 }

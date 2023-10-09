@@ -7,6 +7,8 @@ TagManager:
   - Wall
   - PetRadius
   - Trap
+  - Bullet
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -14,15 +16,15 @@ TagManager:
   - 
   - Water
   - UI
-  - Player
+  - 
   - 
   - 
   - Enemy
   - LightLayer
   - Wall
   - Ground
-  - 
-  - 
+  - Player
+  - PlayerDamaged
   - 
   - 
   - 
@@ -43,4 +45,10 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Player
+    uniqueID: 2692722647
+    locked: 0
+  - name: BackGround
+    uniqueID: 2671311115
     locked: 0
