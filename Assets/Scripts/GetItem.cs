@@ -10,10 +10,12 @@ public class GetItem : MonoBehaviour
     public bool dashItem1;
     public bool gloveItem2;
     public bool bubbleItem3;
+    public bool isFruit;
 
     public Image itemImage1;
     public Image itemImage2;
     public Image itemImage3;
+    public Image fruit;
 
     void OnTriggerEnter2D(Collider2D collision)
     {
@@ -37,6 +39,16 @@ public class GetItem : MonoBehaviour
                 itemImage3.gameObject.SetActive(true);
             }
         }
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            isGet = true;
+            if (isFruit)
+            {
+                collision.gameObject.GetComponent<PlayerMove>().isFruit = true;
+                // fruit.gameObject.SetActive(true);
+                Destroy(gameObject);
+            }
+        }
     }
 
     void Update()
@@ -47,23 +59,28 @@ public class GetItem : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Return))
             {
-                Debug.Log("dd");
                 isGet = false;
 
                 if (dashItem1)
                 {
+                    Destroy(gameObject);
                     itemImage1.gameObject.SetActive(false);
                 }
                 else if (gloveItem2)
                 {
+                    Destroy(gameObject);
                     itemImage2.gameObject.SetActive(false);
                 }
                 else if (bubbleItem3)
                 {
+                    Destroy(gameObject);
                     itemImage3.gameObject.SetActive(false);
                 }
-
-                Destroy(gameObject);
+                else if (isFruit)
+                {
+                    
+                }
+                Time.timeScale = 1f;
             }
         }
     }

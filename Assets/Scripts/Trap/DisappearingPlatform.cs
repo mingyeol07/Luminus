@@ -6,10 +6,10 @@ public class DisappearingPlatform : MonoBehaviour
 {
     private bool isPlayerOnPlatform = false;
     private bool isPlatformDisappeared = false;
-    private float disappearTime = 1.0f;
-    private float reappearTime = 2.0f;
+    private float disappearTime = 3.0f;
+    private float reappearTime = 1.0f;
 
-    void OnCollisionEnter2D(Collision2D collision)
+    void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         {

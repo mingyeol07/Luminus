@@ -35,9 +35,17 @@ public class Enemy : MonoBehaviour
 
     IEnumerator Damaging()
     {
-        spriteRenderer.color = new Color(1f, 1f, 1f, 0.5f);
+        spriteRenderer.color = new Color(1f, 1f, 1f, 0.2f);
         yield return new WaitForSeconds(0.1f);
         spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
 
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.CompareTag("Player"))
+        {
+            collision.GetComponent<PlayerHp>().Damage();
+        }
     }
 }

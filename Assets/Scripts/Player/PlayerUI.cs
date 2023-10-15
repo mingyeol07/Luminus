@@ -4,52 +4,38 @@ using UnityEngine;
 
 public class PlayerUI : MonoBehaviour
 {
-    public GameObject inventory;
-    public GameObject avility;
     public GameObject setting;
+    public GameObject map;
     private bool isTab;
 
     void Update()
     {
-        if (isTab) Time.timeScale = 0f;
-        else Time.timeScale = 1f;
+        map.SetActive(isTab);
+        if (Input.GetKey(KeyCode.Tab))
+        {
+            isTab = true;
+        }
+        else isTab = false;
         
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Setting();
         }
-        if (Input.GetKeyDown(KeyCode.Tab) && !setting.activeSelf)
-        {
-            Inventory();
-        }
     }
+
 
     public void Setting()
     {
 
         if (setting.activeSelf)
         {
-            isTab = false;
+            Time.timeScale = 1f;
             setting.SetActive(false);
         }
         else
         {
-            isTab = true;
+            Time.timeScale = 0f;
             setting.SetActive(true);
-        }
-    }
-
-    public void Inventory()
-    {
-        if (inventory.activeSelf)
-        {
-            isTab = false;
-            inventory.SetActive(false);
-        }
-        else
-        {
-            isTab = true;
-            inventory.SetActive(true);
         }
     }
 }

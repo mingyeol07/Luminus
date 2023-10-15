@@ -13,6 +13,7 @@ public class PlayerMove : MonoBehaviour
     public GameObject run;
     public GameObject trampleAnim;
     public GameObject climbAnim;
+    public GameObject shootingAnim;
     bool isIdle = true;
 
     [Header("Move")]
@@ -34,6 +35,7 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private Transform circlePos;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask trampleLayer;
+    [SerializeField] private LayerMask grassLayer;
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private LayerMask wallLayer;
 
@@ -49,8 +51,10 @@ public class PlayerMove : MonoBehaviour
     private bool isTrampleWait;
     private bool isDash;
     private bool dashCool;
+    private bool isShooting;
 
     private bool isTramplingGround;
+    private bool isgrassGround;
 
     [Header("Delay")]
     private float trampleDelay = 0.1f;
@@ -69,9 +73,22 @@ public class PlayerMove : MonoBehaviour
     public bool dashTrue;
     public bool climbTrue;
     public bool bubbleTrue;
+    public bool isFruit;
 
+    [Header("Particle")]
+    public Transform ParticleGroup;
+    public GameObject ParticlePrefab;
+    public ParticleSystem ParticleSystem;
+    float time = 0f;
+    
+    public AudioSource audioSource;
+    public AudioClip audioRun;
+    public AudioClip audioGrounding;
+    public AudioClip audioDash;
+    public AudioClip audioShoot;
     private void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         rigid = GetComponent<Rigidbody2D>();
     }
@@ -80,8 +97,8 @@ public class PlayerMove : MonoBehaviour
     {
         if (isCodeActive)
         {
+            if (bubbleTrue) gameObject.GetComponent<Shield>().enabled = true;
             Anim();
-            Arm();
             LayerCheck();
             Trample();
             if (dashTrue) Dash();
@@ -91,6 +108,8 @@ public class PlayerMove : MonoBehaviour
                 if (climbTrue) Climb();
                 if (!isWallJump)
                 {
+                    
+                    Arm();
                     Move();
                 }
             }
@@ -103,15 +122,26 @@ public class PlayerMove : MonoBehaviour
         {
             trampleAnim.SetActive(false);
             jump.SetActive(false);
-            if (isIdle)
+            if (isIdle && !isShooting)
             {
                 idle.SetActive(true);
+                shootingAnim.SetActive(false);
                 run.SetActive(false);
             }
-            else
+            else 
             {
-                idle.SetActive(false);
                 run.SetActive(true);
+                if (isShooting)
+                {
+                    shootingAnim.SetActive(true);
+                    idle.SetActive(false);
+                    run.SetActive(false);
+                }
+                else
+                {
+                    shootingAnim.SetActive(false);
+                    idle.SetActive(false);
+                }
             }
         }
         else
@@ -161,13 +191,32 @@ public class PlayerMove : MonoBehaviour
         isGround = Physics2D.OverlapCircle(circlePos.position, groundCheckRadius, groundLayer);
 
         isTramplingGround = Physics2D.OverlapCircle(circlePos.position, groundCheckRadius, trampleLayer);
+        isgrassGround = Physics2D.OverlapCircle(circlePos.position, groundCheckRadius, grassLayer);
     }
     private void Move()
     {
+        time += Time.deltaTime;
         float h = Input.GetAxisRaw("Horizontal");
         rigid.velocity = new Vector2(h * moveSpeed, rigid.velocity.y);
         if (Input.GetButton("Horizontal"))
         {
+            audioSource.clip = audioRun;
+            audioSource.Play();
+            if (isTramplingGround)
+            {
+                rigid.velocity = Vector2.up * 8f;
+            }
+            if (isgrassGround)
+            {
+                if (time > 0.3f)
+                {
+                    time = 0f;
+                    GameObject instantiEffectObj = Instantiate(ParticlePrefab, ParticleGroup);
+                    ParticleSystem = instantiEffectObj.GetComponent<ParticleSystem>();
+                    ParticleSystem.transform.position = circlePos.position;
+                }
+                
+            }
             isIdle = false;
         }
         else
@@ -206,6 +255,8 @@ public class PlayerMove : MonoBehaviour
 
     IEnumerator DashTime()
     {
+        audioSource.clip = audioDash;
+        audioSource.Play();
         isDash = true;
         yield return new WaitForSeconds(0.3f);
         isDash = false;
@@ -227,22 +278,25 @@ public class PlayerMove : MonoBehaviour
     {
         if (isTrampling)
         {
-            
             rigid.velocity = Vector2.down * tramplePower;
             if (isGround)
             {
                 isTrampling = false;
             }
         }
-        if (!isTrampling && !isGround && Input.GetKeyDown(KeyCode.S)) StartCoroutine(TrampWait());
+        if (!isTrampling && !isGround && Input.GetKeyDown(KeyCode.S))StartCoroutine(TrampWait()); 
         if (isTrampleWait) rigid.velocity = Vector2.zero;
     }
     private IEnumerator TrampWait()
     {
+        audioSource.clip = audioGrounding;
+        audioSource.Play();
+
         isTrampleWait = true;
         yield return new WaitForSeconds(trampleDelay);
         isTrampleWait = false;
         isTrampling = true;
+        yield return new WaitForSeconds(2f); isTrampling = false;
     }
 
     private IEnumerator WallJumpWait()
@@ -254,15 +308,19 @@ public class PlayerMove : MonoBehaviour
 
     private void Arm()
     {
+        if (bulletCurrTime > 0) isShooting = true;
+        else if (bulletCurrTime <= 0) isShooting = false;
+
         if (bulletCurrTime <= 0)
         {
-            if (Input.GetKeyDown(KeyCode.Mouse0))
+            if (Input.GetKeyDown(KeyCode.Mouse0) && isGround)
             {
+                audioSource.clip = audioShoot;
+                audioSource.Play();
                 bulletCurrTime = bulletCoolTime;
                 Instantiate(bullet, bulletPos.position, arm.transform.rotation);
             }
         }
         bulletCurrTime -= Time.deltaTime;
     }
-    
 }

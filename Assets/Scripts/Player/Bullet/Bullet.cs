@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using TreeEditor;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour
@@ -29,6 +28,16 @@ public class Bullet : MonoBehaviour
             collision.gameObject.GetComponent<Enemy>().Damage();
             Destroy(gameObject);
 
+        }
+        if (collision.gameObject.CompareTag("LastBoss"))
+        {
+            collision.gameObject.GetComponent<LastBoss>().Damage();
+            Destroy(gameObject);
+        }
+        if (collision.gameObject.CompareTag("CloneBoss"))
+        {
+            collision.gameObject.GetComponent<CloneBoss>().Damage();
+            Destroy(gameObject);
         }
     }
 }

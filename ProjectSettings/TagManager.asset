@@ -9,6 +9,8 @@ TagManager:
   - Trap
   - Bullet
   - Enemy
+  - LastBoss
+  - CloneBoss
   layers:
   - Default
   - TransparentFX
@@ -17,8 +19,8 @@ TagManager:
   - Water
   - UI
   - 
-  - 
-  - 
+  - Trample
+  - Grass
   - Enemy
   - LightLayer
   - Wall

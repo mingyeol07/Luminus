@@ -46,6 +46,10 @@ public class PlayerHp : MonoBehaviour
 
     private void Update()
     {
+        if (hp < 100)
+        {
+            hp += Time.deltaTime * 0.2f;
+        }
         if (!isFear)
         {
             fearingImage.SetActive(true);

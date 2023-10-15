@@ -13,7 +13,7 @@ public class Shield : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F) && !isShieldActive)
+        if (Input.GetKeyDown(KeyCode.LeftControl) && !isShieldActive)
         {
             Debug.Log("방패활성화");
           
@@ -25,9 +25,11 @@ public class Shield : MonoBehaviour
     {
         isShieldActive = true;
         shieldObject.SetActive(true);
+        gameObject.layer = 14;
 
         yield return new WaitForSeconds(shieldDuration);
 
+        gameObject.layer = 0;
         shieldObject.SetActive(false);
         isShieldActive = false; 
         Debug.Log("방패 비활성화");
